@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>스마트 암기장 Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #764ba2;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .tab.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+            font-weight: bold;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background: #5a67d8;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .btn-success {
+            background: #27ae60;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        .category-list {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .category-item {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s;
+        }
+
+        .category-item:hover {
+            transform: translateX(5px);
+            background: #e9ecef;
+        }
+
+        .category-info h3 {
+            color: #495057;
+            margin-bottom: 5px;
+        }
+
+        .category-info p {
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        .category-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .flashcard-container {
+            perspective: 1000px;
+            margin-bottom: 30px;
+        }
+
+        .flashcard {
+            position: relative;
+            width: 100%;
+            height: 350px;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        .flashcard.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .card-front {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .card-back {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            transform: rotateY(180deg);
+        }
+
+        .card-content {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .difficulty-buttons {
+            position: absolute;
+            bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .diff-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+            transition: transform 0.2s;
+        }
+
+        .diff-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .diff-easy {
+            background: #27ae60;
+        }
+
+        .diff-medium {
+            background: #f39c12;
+        }
+
+        .diff-hard {
+            background: #e74c3c;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .control-btn {
+            flex: 1;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .control-btn:hover {
+            background: #5a67d8;
+        }
+
+        .control-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-card h4 {
+            color: #6c757d;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            color: #495057;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .mode-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .filter-options {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .flashcard {
+                height: 300px;
+            }
+
+            .card-content {
+                font-size: 24px;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+            }
+
+            .tab {
+                font-size: 14px;
+                padding: 8px 12px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 스마트 암기장 Pro</h1>
+        
+        <div class="tabs">
+            <button class="tab active" data-tab="home">🏠 홈</button>
+            <button class="tab" data-tab="categories">📁 카테고리</button>
+            <button class="tab" data-tab="study">📖 학습하기</button>
+            <button class="tab" data-tab="review">❌ 오답노트</button>
+            <button class="tab" data-tab="stats">📊 통계</button>
+        </div>
+
+        <!-- 홈 탭 -->
+        <div class="tab-content active" id="home">
+            <h2>빠른 시작</h2>
+            <div class="input-group">
+                <label>구글 시트 ID 입력</label>
+                <input type="text" id="sheetId" placeholder="예: 1ABC...xyz">
+                <small style="color: #666;">구글 시트 URL에서 /d/ 다음의 문자열</small>
+            </div>
+            <div class="input-group">
+                <label>카테고리 이름</label>
+                <input type="text" id="categoryName" placeholder="예: TOEIC 단어, 한국사 연도">
+            </div>
+            <button class="btn" onclick="loadFromGoogleSheet()">구글 시트에서 불러오기</button>
+            
+            <hr style="margin: 30px 0; border: none; border-top: 1px solid #e0e0e0;">
+            
+            <div class="input-group">
+                <label>또는 CSV 파일 업로드</label>
+                <input type="file" id="csvFile" accept=".csv">
+            </div>
+
+            <div id="homeMessage"></div>
+        </div>
+
+        <!-- 카테고리 탭 -->
+        <div class="tab-content" id="categories">
+            <h2>카테고리 관리</h2>
+            <div class="category-list" id="categoryList"></div>
+        </div>
+
+        <!-- 학습 탭 -->
+        <div class="tab-content" id="study">
+            <div class="input-group">
+                <label>카테고리 선택</label>
+                <select id="studyCategory">
+                    <option value="">카테고리를 선택하세요</option>
+                </select>
+            </div>
+
+            <div class="filter-options">
+                <button class="filter-btn active" data-filter="all">전체</button>
+                <button class="filter-btn" data-filter="wrong">자주 틀리는 것</button>
+                <button class="filter-btn" data-filter="notStudied">학습 안 함</button>
+            </div>
+
+            <div class="mode-selector">
+                <button class="mode-btn active" data-mode="front-back">앞면 → 뒷면</button>
+                <button class="mode-btn" data-mode="back-front">뒷면 → 앞면</button>
+                <button class="mode-btn" data-mode="random">랜덤</button>
+            </div>
+
+            <div id="studyArea" style="display: none;">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill">0%</div>
+                </div>
+
+                <div class="flashcard-container">
+                    <div class="flashcard" id="flashcard">
+                        <div class="card-face card-front">
+                            <div class="card-content" id="frontText">카드를 선택하세요</div>
+                        </div>
+                        <div class="card-face card-back">
+                            <div class="card-content" id="backText">카드를 선택하세요</div>
+                            <div class="difficulty-buttons">
+                                <button class="diff-btn diff-easy" onclick="markDifficulty('easy')">쉬움</button>
+                                <button class="diff-btn diff-medium" onclick="markDifficulty('medium')">보통</button>
+                                <button class="diff-btn diff-hard" onclick="markDifficulty('hard')">어려움</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <button class="control-btn" id="prevBtn" onclick="prevCard()">◀ 이전</button>
+                    <button class="control-btn" onclick="flipCard()">뒤집기 (Space)</button>
+                    <button class="control-btn" id="nextBtn" onclick="nextCard()">다음 ▶</button>
+                </div>
+
+                <button class="btn btn-success" style="width: 100%;" onclick="shuffleCards()">🔀 카드 섞기</button>
+            </div>
+        </div>
+
+        <!-- 오답노트 탭 -->
+        <div class="tab-content" id="review">
+            <h2>오답노트</h2>
+            <div class="input-group">
+                <select id="reviewCategory">
+                    <option value="">카테고리를 선택하세요</option>
+                </select>
+            </div>
+            <div id="wrongCardsList"></div>
+            <button class="btn" onclick="studyWrongCards()">오답만 학습하기</button>
+        </div>
+
+        <!-- 통계 탭 -->
+        <div class="tab-content" id="stats">
+            <h2>학습 통계</h2>
+            <div class="input-group">
+                <select id="statsCategory">
+                    <option value="">카테고리를 선택하세요</option>
+                </select>
+            </div>
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <h4>총 카드 수</h4>
+                    <p id="totalCards">0</p>
+                </div>
+                <div class="stat-card">
+                    <h4>학습한 카드</h4>
+                    <p id="studiedCards">0</p>
+                </div>
+                <div class="stat-card">
+                    <h4>정답률</h4>
+                    <p id="accuracy">0%</p>
+                </div>
+                <div class="stat-card">
+                    <h4>자주 틀리는 카드</h4>
+                    <p id="difficultCards">0</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 전역 변수
+        let categories = {};
+        let currentCategory = null;
+        let currentCards = [];
+        let currentIndex = 0;
+        let currentMode = 'front-back';
+        let currentFilter = 'all';
+        let studyHistory = {};
+
+        // 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            setupEventListeners();
+        });
+
+        // 이벤트 리스너 설정
+        function setupEventListeners() {
+            // 탭 전환
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    switchTab(this.dataset.tab);
+                });
+            });
+
+            // 모드 선택
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentMode = this.dataset.mode;
+                    if (currentCards.length > 0) {
+                        updateCard();
+                    }
+                });
+            });
+
+            // 필터 선택
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentFilter = this.dataset.filter;
+                    applyFilter();
+                });
+            });
+
+            // CSV 파일 업로드
+            document.getElementById('csvFile').addEventListener('change', handleFileUpload);
+
+            // 카테고리 선택
+            document.getElementById('studyCategory').addEventListener('change', loadStudyCategory);
+            document.getElementById('reviewCategory').addEventListener('change', loadReviewCategory);
+            document.getElementById('statsCategory').addEventListener('change', loadStatsCategory);
+
+            // 키보드 단축키
+            document.addEventListener('keydown', function(e) {
+                if (currentCards.length === 0) return;
+                
+                switch(e.key) {
+                    case 'ArrowLeft':
+                        prevCard();
+                        break;
+                    case 'ArrowRight':
+                        nextCard();
+                        break;
+                    case ' ':
+                    case 'Enter':
+                        e.preventDefault();
+                        flipCard();
+                        break;
+                }
+            });
+        }
+
+        // 탭 전환
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+            
+            if (tabName === 'categories') {
+                updateCategoryList();
+            } else if (tabName === 'study') {
+                updateStudyCategories();
+            } else if (tabName === 'review') {
+                updateReviewCategories();
+            } else if (tabName === 'stats') {
+                updateStatsCategories();
+            }
+        }
+
+        // 구글 시트에서 데이터 불러오기
+        async function loadFromGoogleSheet() {
+            const sheetId = document.getElementById('sheetId').value.trim();
+            const categoryName = document.getElementById('categoryName').value.trim();
+            
+            if (!sheetId || !categoryName) {
+                showMessage('homeMessage', '시트 ID와 카테고리 이름을 입력하세요.', 'error');
+                return;
+            }
+
+            try {
+                // CSV 형식으로 구글 시트 데이터 가져오기
+                const url = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv`;
+                
+                // CORS 문제를 우회하기 위한 프록시 사용
+                const proxyUrl = `https://cors-anywhere.herokuapp.com/${url}`;
+                
+                showMessage('homeMessage', '데이터를 불러오는 중... (프록시 서버 사용 시 시간이 걸릴 수 있습니다)', 'success');
+                
+                // 직접 fetch 시도
+                fetch(url)
+                    .then(response => response.text())
+                    .then(data => {
+                        parseAndSaveCSV(data, categoryName);
+                    })
+                    .catch(error => {
+                        showMessage('homeMessage', 
+                            'CORS 오류: 구글 시트를 "웹에 게시"로 설정하거나 CSV 파일로 다운로드 후 업로드해주세요.', 
+                            'error'
+                        );
+                    });
+            } catch (error) {
+                showMessage('homeMessage', '오류가 발생했습니다: ' + error.message, 'error');
+            }
+        }
+
+        // CSV 파일 업로드 처리
+        function handleFileUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const categoryName = document.getElementById('categoryName').value.trim() || 
+                                file.name.replace('.csv', '');
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                parseAndSaveCSV(e.target.result, categoryName);
+            };
+            reader.readAsText(file, 'UTF-8');
+        }
+
+        // CSV 파싱 및 저장
+        function parseAndSaveCSV(text, categoryName) {
+            const lines = text.split('\n').filter(line => line.trim());
+            const cards = [];
+            
+            for (let i = 0; i < lines.length; i++) {
+                const columns = lines[i].split(',').map(col => col.trim().replace(/"/g, ''));
+                if (columns.length >= 2 && columns[0] && columns[1]) {
+                    cards.push({
+                        id: Date.now() + '_' + i,
+                        front: columns[0],
+                        back: columns[1],
+                        wrongCount: 0,
+                        studyCount: 0,
+                        lastDifficulty: null,
+                        lastStudied: null
+                    });
+                }
+            }
+            
+            if (cards.length > 0) {
+                categories[categoryName] = {
+                    name: categoryName,
+                    cards: cards,
+                    created: new Date().toISOString(),
+                    lastModified: new Date().toISOString()
+                };
+                
+                saveData();
+                showMessage('homeMessage', 
+                    `✅ ${categoryName} 카테고리에 ${cards.length}개의 카드가 추가되었습니다!`, 
+                    'success'
+                );
+                
+                document.getElementById('categoryName').value = '';
+                document.getElementById('csvFile').value = '';
+                document.getElementById('sheetId').value = '';
+                
+                updateCategoryList();
+            } else {
+                showMessage('homeMessage', '유효한 데이터를 찾을 수 없습니다.', 'error');
+            }
+        }
+
+        // 카테고리 목록 업데이트
+        function updateCategoryList() {
+            const listEl = document.getElementById('categoryList');
+            listEl.innerHTML = '';
+            
+            if (Object.keys(categories).length === 0) {
+                listEl.innerHTML = '<p style="text-align: center; color: #666;">아직 카테고리가 없습니다.</p>';
+                return;
+            }
+            
+            for (const [key, category] of Object.entries(categories)) {
+                const item = document.createElement('div');
+                item.className = 'category-item';
+                item.innerHTML = `
+                    <div class="category-info">
+                        <h3>${category.name}</h3>
+                        <p>카드 ${category.cards.length}개 | 생성: ${new Date(category.created).toLocaleDateString()}</p>
+                    </div>
+                    <div class="category-actions">
+                        <button class="btn" onclick="startStudy('${key}')">학습</button>
+                        <button class="btn btn-danger" onclick="deleteCategory('${key}')">삭제</button>
+                    </div>
+                `;
+                listEl.appendChild(item);
+            }
+        }
+
+        // 학습 카테고리 업데이트
+        function updateStudyCategories() {
+            const select = document.getElementById('studyCategory');
+            select.innerHTML = '<option value="">카테고리를 선택하세요</option>';
+            
+            for (const key of Object.keys(categories)) {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = categories[key].name;
+                select.appendChild(option);
+            }
+        }
+
+        // 리뷰 카테고리 업데이트
+        function updateReviewCategories() {
+            const select = document.getElementById('reviewCategory');
+            select.innerHTML = '<option value="">카테고리를 선택하세요</option>';
+            
+            for (const key of Object.keys(categories)) {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = categories[key].name;
+                select.appendChild(option);
+            }
+        }
+
+        // 통계 카테고리 업데이트
+        function updateStatsCategories() {
+            const select = document.getElementById('statsCategory');
+            select.innerHTML = '<option value="">카테고리를 선택하세요</option>';
+            
+            for (const key of Object.keys(categories)) {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = categories[key].name;
+                select.appendChild(option);
+            }
+        }
+
+        // 학습 시작
+        function startStudy(categoryKey) {
+            currentCategory = categoryKey;
+            switchTab('study');
+            document.getElementById('studyCategory').value = categoryKey;
+            loadStudyCategory();
+        }
+
+        // 학습 카테고리 로드
+        function loadStudyCategory() {
+            const categoryKey = document.getElementById('studyCategory').value;
+            if (!categoryKey) {
+                document.getElementById('studyArea').style.display = 'none';
+                return;
+            }
+            
+            currentCategory = categoryKey;
+            currentCards = [...categories[categoryKey].cards];
+            currentIndex = 0;
+            
+            applyFilter();
+            
+            document.getElementById('studyArea').style.display = 'block';
+            updateCard();
+        }
+
+        // 필터 적용
+        function applyFilter() {
+            if (!currentCategory) return;
+            
+            const allCards = categories[currentCategory].cards;
+            
+            switch(currentFilter) {
+                case 'wrong':
+                    currentCards = allCards.filter(card => card.wrongCount > 0)
+                        .sort((a, b) => b.wrongCount - a.wrongCount);
+                    break;
+                case 'notStudied':
+                    currentCards = allCards.filter(card => card.studyCount === 0);
+                    break;
+                default:
+                    currentCards = [...allCards];
+            }
+            
+            if (currentCards.length === 0) {
+                alert('해당 필터에 맞는 카드가 없습니다.');
+                currentCards = [...allCards];
+                document.querySelector('.filter-btn.active').classList.remove('active');
+                document.querySelector('[data-filter="all"]').classList.add('active');
+                currentFilter = 'all';
+            }
+            
+            currentIndex = 0;
+            updateCard();
+        }
+
+        // 카드 업데이트
+        function updateCard() {
+            if (currentCards.length === 0) return;
+            
+            const card = currentCards[currentIndex];
+            let frontText, backText;
+            
+            if (currentMode === 'back-front') {
+                frontText = card.back;
+                backText = card.front;
+            } else if (currentMode === 'random') {
+                const random = Math.random() > 0.5;
+                frontText = random ? card.front : card.back;
+                backText = random ? card.back : card.front;
+            } else {
+                frontText = card.front;
+                backText = card.back;
+            }
+            
+            document.getElementById('frontText').textContent = frontText;
+            document.getElementById('backText').textContent = backText;
+            
+            // 진행률 업데이트
+            const progress = ((currentIndex + 1) / currentCards.length * 100).toFixed(0);
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('progressFill').textContent = `${currentIndex + 1} / ${currentCards.length} (${progress}%)`;
+            
+            // 카드 초기화
+            document.getElementById('flashcard').classList.remove('flipped');
+            
+            // 버튼 상태 업데이트
+            document.getElementById('prevBtn').disabled = currentIndex === 0;
+            document.getElementById('nextBtn').disabled = currentIndex === currentCards.length - 1;
+            
+            // 학습 횟수 증가
+            card.studyCount++;
+            card.lastStudied = new Date().toISOString();
+            saveData();
+        }
+
+        // 카드 뒤집기
+        function flipCard() {
+            document.getElementById('flashcard').classList.toggle('flipped');
+        }
+
+        // 이전 카드
+        function prevCard() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateCard();
+            }
+        }
+
+        // 다음 카드
+        function nextCard() {
+            if (currentIndex < currentCards.length - 1) {
+                currentIndex++;
+                updateCard();
+            }
+        }
+
+        // 카드 섞기
+        function shuffleCards() {
+            for (let i = currentCards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [currentCards[i], currentCards[j]] = [currentCards[j], currentCards[i]];
+            }
+            currentIndex = 0;
+            updateCard();
+        }
+
+        // 난이도 표시
+        function markDifficulty(level) {
+            const card = currentCards[currentIndex];
+            card.lastDifficulty = level;
+            
+            if (level === 'hard') {
+                card.wrongCount++;
+            }
+            
+            saveData();
+            
+            // 자동으로 다음 카드로
+            if (currentIndex < currentCards.length - 1) {
+                setTimeout(() => {
+                    nextCard();
+                }, 500);
+            }
+        }
+
+        // 오답 카드 로드
+        function loadReviewCategory() {
+            const categoryKey = document.getElementById('reviewCategory').value;
+            if (!categoryKey) {
+                document.getElementById('wrongCardsList').innerHTML = '';
+                return;
+            }
+            
+            const wrongCards = categories[categoryKey].cards
+                .filter(card => card.wrongCount > 0)
+                .sort((a, b) => b.wrongCount - a.wrongCount);
+            
+            const listEl = document.getElementById('wrongCardsList');
+            
+            if (wrongCards.length === 0) {
+                listEl.innerHTML = '<p style="text-align: center; color: #666;">오답이 없습니다! 👏</p>';
+                return;
+            }
+            
+            listEl.innerHTML = wrongCards.map(card => `
+                <div class="category-item">
+                    <div class="category-info">
+                        <h3>${card.front}</h3>
+                        <p>${card.back} | 틀린 횟수: ${card.wrongCount}회</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 오답만 학습
+        function studyWrongCards() {
+            const categoryKey = document.getElementById('reviewCategory').value;
+            if (!categoryKey) {
+                alert('카테고리를 선택하세요.');
+                return;
+            }
+            
+            currentCategory = categoryKey;
+            currentFilter = 'wrong';
+            
+            switchTab('study');
+            document.getElementById('studyCategory').value = categoryKey;
+            
+            // 필터 버튼 업데이트
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector('[data-filter="wrong"]').classList.add('active');
+            
+            loadStudyCategory();
+        }
+
+        // 통계 로드
+        function loadStatsCategory() {
+            const categoryKey = document.getElementById('statsCategory').value;
+            if (!categoryKey) {
+                document.getElementById('totalCards').textContent = '0';
+                document.getElementById('studiedCards').textContent = '0';
+                document.getElementById('accuracy').textContent = '0%';
+                document.getElementById('difficultCards').textContent = '0';
+                return;
+            }
+            
+            const category = categories[categoryKey];
+            const totalCards = category.cards.length;
+            const studiedCards = category.cards.filter(card => card.studyCount > 0).length;
+            const difficultCards = category.cards.filter(card => card.wrongCount > 0).length;
+            
+            let totalStudy = 0;
+            let totalWrong = 0;
+            category.cards.forEach(card => {
+                totalStudy += card.studyCount;
+                totalWrong += card.wrongCount;
+            });
+            
+            const accuracy = totalStudy > 0 ? 
+                Math.round((1 - totalWrong / totalStudy) * 100) : 0;
+            
+            document.getElementById('totalCards').textContent = totalCards;
+            document.getElementById('studiedCards').textContent = studiedCards;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+            document.getElementById('difficultCards').textContent = difficultCards;
+        }
+
+        // 카테고리 삭제
+        function deleteCategory(key) {
+            if (confirm(`"${categories[key].name}" 카테고리를 삭제하시겠습니까?`)) {
+                delete categories[key];
+                saveData();
+                updateCategoryList();
+            }
+        }
+
+        // 메시지 표시
+        function showMessage(elementId, message, type) {
+            const el = document.getElementById(elementId);
+            el.className = `message ${type}`;
+            el.textContent = message;
+            el.style.display = 'block';
+            
+            setTimeout(() => {
+                el.style.display = 'none';
+            }, 5000);
+        }
+
+        // 데이터 저장
+        function saveData() {
+            localStorage.setItem('flashcardCategories', JSON.stringify(categories));
+            localStorage.setItem('studyHistory', JSON.stringify(studyHistory));
+        }
+
+        // 데이터 로드
+        function loadData() {
+            const savedCategories = localStorage.getItem('flashcardCategories');
+            const savedHistory = localStorage.getItem('studyHistory');
+            
+            if (savedCategories) {
+                categories = JSON.parse(savedCategories);
+            }
+            
+            if (savedHistory) {
+                studyHistory = JSON.parse(savedHistory);
+            }
+            
+            updateCategoryList();
+        }
+    </script>
+</body>
+</html>

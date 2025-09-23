@@ -1,2 +1,0 @@
-# eng01-flashcard
-.
