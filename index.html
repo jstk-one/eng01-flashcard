@@ -468,9 +468,15 @@
         <div class="tab-content active" id="home">
             <h2>빠른 시작</h2>
             <div class="input-group">
-                <label>구글 시트 ID 입력</label>
-                <input type="text" id="sheetId" placeholder="예: 1ABC...xyz">
-                <small style="color: #666;">구글 시트 URL에서 /d/ 다음의 문자열</small>
+                <label>구글 시트 ID 또는 게시 URL</label>
+                <input type="text" id="sheetId" placeholder="시트 ID 또는 전체 URL 입력">
+                <small style="color: #666;">
+                    입력 가능한 형식:<br>
+                    • 시트 ID: 1ABC...xyz<br>
+                    • 편집 URL: https://docs.google.com/spreadsheets/d/.../edit<br>
+                    • 게시 URL: 2PACX-1vR.../pub?output=csv<br>
+                    • 전체 게시 URL: https://docs.google.com/.../pub?output=csv
+                </small>
             </div>
             <div class="input-group">
                 <label>카테고리 이름</label>
@@ -503,17 +509,39 @@
                     ✅ UTF-8, EUC-KR 인코딩 자동 처리
                 </p>
                 
+                <div style="background: #d1ecf1; padding: 15px; border-radius: 5px; margin-top: 15px; border-left: 4px solid #17a2b8;">
+                    <h4 style="color: #0c5460; margin-bottom: 10px;">🔗 구글 시트 연동 방법</h4>
+                    <p style="color: #0c5460; font-size: 14px;">
+                        <strong>1. 웹에 게시하기:</strong><br>
+                        • 구글 시트 열기 → 파일 → 공유 → 웹에 게시<br>
+                        • 형식: <strong>CSV</strong> 선택 (중요!)<br>
+                        • 게시 버튼 클릭<br><br>
+                        
+                        <strong>2. URL 복사:</strong><br>
+                        • 생성된 URL 전체를 복사<br>
+                        • 또는 시트 편집 URL의 /d/ 다음 ID만 복사<br><br>
+                        
+                        <strong>3. 암기장에 입력:</strong><br>
+                        • 위 입력창에 붙여넣기<br>
+                        • 카테고리 이름 입력<br>
+                        • "구글 시트에서 불러오기" 클릭
+                    </p>
+                </div>
+                
                 <div style="background: #fff3cd; padding: 15px; border-radius: 5px; margin-top: 15px; border-left: 4px solid #ffc107;">
                     <h4 style="color: #856404; margin-bottom: 10px;">⚠️ 문자 깨짐 해결법</h4>
                     <p style="color: #856404; font-size: 14px;">
+                        <strong>한글이 깨져 보이는 경우:</strong><br>
+                        • 구글 시트에서 한글 입력 후 저장했는지 확인<br>
+                        • 웹에 게시 시 형식을 반드시 <strong>CSV</strong>로 선택<br>
+                        • 게시 후 1-2분 대기 (구글 서버 반영 시간)<br><br>
+                        
                         <strong>엑셀에서 CSV 저장 시:</strong><br>
                         • 파일 → 다른 이름으로 저장 → CSV UTF-8 (쉼표로 분리) 선택<br><br>
                         
-                        <strong>구글 시트에서:</strong><br>
-                        • 파일 → 다운로드 → 쉼표로 구분된 값 (.csv) - 자동으로 UTF-8<br><br>
-                        
-                        <strong>메모장에서 저장 시:</strong><br>
-                        • 저장할 때 인코딩: "UTF-8" 선택
+                        <strong>여전히 깨진다면:</strong><br>
+                        • 구글 시트 → 파일 → 다운로드 → CSV<br>
+                        • 다운로드한 파일을 직접 업로드
                     </p>
                 </div>
             </div>
@@ -721,54 +749,126 @@
 
         // 구글 시트에서 데이터 불러오기
         async function loadFromGoogleSheet() {
-            const sheetId = document.getElementById('sheetId').value.trim();
+            const sheetInput = document.getElementById('sheetId').value.trim();
             const categoryName = document.getElementById('categoryName').value.trim();
             
-            if (!sheetId || !categoryName) {
-                showMessage('homeMessage', '시트 ID와 카테고리 이름을 입력하세요.', 'error');
+            if (!sheetInput || !categoryName) {
+                showMessage('homeMessage', '시트 ID 또는 URL과 카테고리 이름을 입력하세요.', 'error');
                 return;
             }
 
             try {
-                // CSV 형식으로 구글 시트 데이터 가져오기
-                const url = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv`;
+                let url;
                 
+                // 입력값이 전체 URL인지 시트 ID인지 구분
+                if (sheetInput.includes('http') || sheetInput.includes('/')) {
+                    // 전체 URL이 입력된 경우
+                    if (sheetInput.includes('2PACX')) {
+                        // 게시된 URL 형식
+                        if (!sheetInput.startsWith('http')) {
+                            url = 'https://docs.google.com/spreadsheets/d/e/' + sheetInput;
+                        } else {
+                            url = sheetInput;
+                        }
+                    } else if (sheetInput.includes('/edit')) {
+                        // 편집 URL을 CSV 내보내기 URL로 변환
+                        const sheetId = sheetInput.match(/\/d\/([a-zA-Z0-9-_]+)/)?.[1];
+                        if (sheetId) {
+                            url = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv`;
+                        } else {
+                            url = sheetInput;
+                        }
+                    } else {
+                        url = sheetInput;
+                    }
+                } else {
+                    // 시트 ID만 입력된 경우
+                    url = `https://docs.google.com/spreadsheets/d/${sheetInput}/export?format=csv`;
+                }
+                
+                console.log('Fetching from URL:', url);
                 showMessage('homeMessage', '데이터를 불러오는 중...', 'success');
                 
-                // fetch로 데이터 가져오기
+                // fetch로 데이터 가져오기 (인코딩 처리 강화)
                 fetch(url)
                     .then(response => {
-                        // 응답 인코딩 확인
-                        const contentType = response.headers.get('content-type');
-                        console.log('Content-Type:', contentType);
-                        
-                        // 텍스트로 변환 (UTF-8 자동 처리)
-                        return response.text();
-                    })
-                    .then(data => {
-                        // BOM 제거
-                        if (data.charCodeAt(0) === 0xFEFF) {
-                            data = data.slice(1);
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
                         }
-                        parseAndSaveCSV(data, categoryName);
+                        // ArrayBuffer로 받아서 인코딩 직접 처리
+                        return response.arrayBuffer();
+                    })
+                    .then(buffer => {
+                        // UTF-8로 먼저 시도
+                        let decoder = new TextDecoder('utf-8');
+                        let text = decoder.decode(buffer);
+                        
+                        // BOM 제거
+                        if (text.charCodeAt(0) === 0xFEFF) {
+                            text = text.slice(1);
+                        }
+                        
+                        // 한글 깨짐 확인
+                        if (text.includes('�') || containsBrokenKorean(text)) {
+                            // EUC-KR로 재시도
+                            try {
+                                decoder = new TextDecoder('euc-kr');
+                                text = decoder.decode(buffer);
+                            } catch (e) {
+                                // EUC-KR 디코더가 없으면 UTF-8 유지
+                                console.log('EUC-KR decoder not available, using UTF-8');
+                            }
+                        }
+                        
+                        console.log('First 200 chars:', text.substring(0, 200));
+                        parseAndSaveCSV(text, categoryName);
                     })
                     .catch(error => {
                         console.error('Error:', error);
                         showMessage('homeMessage', 
-                            `오류 발생: 구글 시트가 "웹에 게시" 상태인지 확인하세요.
+                            `오류 발생: ${error.message}
                             
                             해결 방법:
                             1. 구글 시트 → 파일 → 공유 → 웹에 게시
                             2. 형식: CSV 선택 → 게시
-                            3. 1-2분 후 다시 시도
+                            3. 생성된 URL 전체를 복사해서 붙여넣기
                             
-                            또는 CSV 파일로 다운로드 후 업로드해주세요.`, 
+                            또는 시트 ID만 입력:
+                            • URL에서 /d/ 다음의 문자열만 복사
+                            
+                            예시:
+                            • 전체 URL: https://docs.google.com/.../pub?output=csv
+                            • 시트 ID: 1ABC...xyz`, 
                             'error'
                         );
                     });
             } catch (error) {
                 showMessage('homeMessage', '오류가 발생했습니다: ' + error.message, 'error');
             }
+        }
+        
+        // 한글 깨짐 감지 함수
+        function containsBrokenKorean(text) {
+            // 정상적인 한글 패턴
+            const validKorean = /[가-힣ㄱ-ㅎㅏ-ㅣ]/;
+            // 깨진 문자 패턴
+            const brokenPattern = /[\uFFFD�]/;
+            
+            // 텍스트에 한글이 있어야 하는데 깨진 문자가 있으면 true
+            if (validKorean.test(text) && brokenPattern.test(text)) {
+                return true;
+            }
+            
+            // CSV 형식인데 한글이 전혀 없으면 의심
+            const lines = text.split('\n').slice(0, 5); // 처음 5줄만 확인
+            for (let line of lines) {
+                if (line.includes(',') && !validKorean.test(line)) {
+                    // 쉼표는 있는데 한글이 없으면 깨졌을 가능성
+                    return true;
+                }
+            }
+            
+            return false;
         }
 
         // CSV 파일 업로드 처리 (인코딩 자동 감지)
