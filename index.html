@@ -469,7 +469,7 @@
             <h2>빠른 시작</h2>
             <div class="input-group">
                 <label>구글 시트 ID 입력</label>
-                <input type="text" id="2PACX-1vRPlsSmfkW40I_BFGq4W73RxmgIE_5L04O9sUsCMZ51l_4M8qutZopoN8Z_q-wRUAbtBrwunghEqOCP">
+                <input type="text" id="sheetId" placeholder="예: 1ABC...xyz">
                 <small style="color: #666;">구글 시트 URL에서 /d/ 다음의 문자열</small>
             </div>
             <div class="input-group">
@@ -697,7 +697,7 @@
 
             try {
                 // CSV 형식으로 구글 시트 데이터 가져오기
-                const url = `https://docs.google.com/spreadsheets/d/e/2PACX-1vRPlsSmfkW40I_BFGq4W73RxmgIE_5L04O9sUsCMZ51l_4M8qutZopoN8Z_q-wRUAbtBrwunghEqOCP/pub?output=csv`;
+                const url = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv`;
                 
                 // CORS 문제를 우회하기 위한 프록시 사용
                 const proxyUrl = `https://cors-anywhere.herokuapp.com/${url}`;
